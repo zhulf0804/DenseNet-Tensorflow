@@ -12,7 +12,6 @@ k = 12
 L = 40
 layers = 6
 
-
 '''
 (layers * 2) * dense_blocks_num + (dense_blocks_num - 1) + 1(init) + 1(fc)  
 = (6 * 2) * 3 + (3 - 1) + 1 + 1
@@ -44,7 +43,7 @@ def bn_layer(x, is_training):
     return output
 
 
-def dense_block_layer(input, k, k0, layer, train, keep_prob):
+def dense_block_layer(input, k, k0, layer, train):
     '''
     :param input: input feature map
     :param k: output channels
@@ -60,15 +59,13 @@ def dense_block_layer(input, k, k0, layer, train, keep_prob):
         input = bn_layer(input, train)
         input = tf.nn.relu(input)
         input = tf.nn.conv2d(input, weights_1, [1, 1, 1, 1], padding='SAME', name='conv1')
-        input = tf.nn.dropout(input, keep_prob=keep_prob)
         input = bn_layer(input, train)
         input = tf.nn.relu(input)
         input = tf.nn.conv2d(input, weights_3, [1, 1, 1, 1], padding='SAME', name='conv3')
-        input = tf.nn.dropout(input, keep_prob=keep_prob)
     return input
 
 
-def dense_block(input, k, layers, train, keep_prob):
+def dense_block(input, k, layers, train):
     '''
     dense block
     :param input: input feature map
@@ -83,11 +80,11 @@ def dense_block(input, k, layers, train, keep_prob):
     for i in range(1, layers + 1):
         #print(i)
         with tf.name_scope("layer_%d" % i):
-            output = dense_block_layer(input, k, k0, i, train, keep_prob)
+            output = dense_block_layer(input, k, k0, i, train)
             input = tf.concat(values=[input, output], axis=-1)
     return output
 
-def transition_layer(input, train, keep_prob):
+def transition_layer(input, train):
     """
     1x1 conv, 2x2 avegage pool
     :param input:
@@ -98,11 +95,10 @@ def transition_layer(input, train, keep_prob):
         input = bn_layer(input, train)
         weights = weight_variable(shape = [1, 1, input_shape[-1], input_shape[-1]])
         input = tf.nn.conv2d(input, weights, [1, 1, 1, 1], padding='SAME')
-        input = tf.nn.dropout(input, keep_prob=keep_prob)
         input = tf.nn.avg_pool(input, [1, 2, 2, 1], [1, 2, 2, 1], padding='SAME')
     return input
 
-def densenet_cifar(input, keep_prob, train=True):
+def densenet_cifar(input, train=True):
     '''
     densenet: k = 12, L = 40
     :param input:
@@ -118,10 +114,9 @@ def densenet_cifar(input, keep_prob, train=True):
     with tf.name_scope("dense_blocks"):
         for i in range(1, 1 + dense_blocks_num):
             with tf.name_scope("dense_block_%d" % i):
-                input = dense_block(input, k, layers, train, keep_prob)
+                input = dense_block(input, k, layers, train)
                 if i != dense_blocks_num:
-                    input = transition_layer(input, train, keep_prob)
-
+                    input = transition_layer(input, train)
 
     with tf.name_scope('classification_layer'):
         #input = tf.nn.avg_pool(input, [1, 8, 8, 1], [1, 8, 8, 1], padding='VALID')
