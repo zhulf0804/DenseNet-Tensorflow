@@ -1,1 +1,1 @@
-Download data [here](http://www.cs.toronto.edu/~kriz/cifar.html).
+Download data from [here](https://www.cs.toronto.edu/~kriz/cifar.html).
