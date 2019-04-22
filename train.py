@@ -15,7 +15,7 @@ CHANNELS = 3
 CLASSES = DenseNet.CLASSES
 scale = 1e-3 # L2 normalization
 
-MAX_STEPS = 50000
+MAX_STEPS = 44000
 initial_lr = 0.002
 
 saved_ckpt_path = './checkpoint/'
