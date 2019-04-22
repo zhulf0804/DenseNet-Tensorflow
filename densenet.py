@@ -79,13 +79,13 @@ def dense_block(input, k, layers, train, keep_prob):
     '''
     input_shape = input.get_shape().as_list()
     k0 = input_shape[-1]
-    output = input
+    #output = input
     for i in range(1, layers + 1):
         #print(i)
         with tf.name_scope("layer_%d" % i):
             output = dense_block_layer(input, k, k0, i, train, keep_prob)
             input = tf.concat(values=[input, output], axis=-1)
-    return output
+    return input
 
 def transition_layer(input, train, keep_prob):
     """
