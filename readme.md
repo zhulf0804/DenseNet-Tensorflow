@@ -16,15 +16,15 @@ Adding dropout layer, without regularization.
 
 + Accuracy
 
-    ![](./testresults_dropout/accuracy.png)
+    ![](./testresults_dropout/accuracy_0.png)
 
 + Learning rate
 
-    ![](./testresults_dropout/lr.png)
+    ![](./testresults_dropout/lr_0.png)
     
 + Loss 
 
-    ![](./testresults_dropout/loss.png)
+    ![](./testresults_dropout/loss_0.png)
    
 ## prediction on test set
 

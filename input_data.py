@@ -130,8 +130,7 @@ def read_train_files():
         else:
             image_data = np.concatenate((image_data, image_data_part), axis=0)
         labels += labels_part
-    #print(image_data.shape, image_data.dtype)
-    #print(len(labels), type(labels))
+    
 
     labels = np.array(labels, dtype=np.int32)
     #print(labels.dtype)
