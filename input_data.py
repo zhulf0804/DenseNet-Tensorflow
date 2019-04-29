@@ -14,6 +14,8 @@ import math
 DATA_DIR = './cifar-10-batches-py'
 TRAIN_FILES = ['data_batch_1', 'data_batch_2', 'data_batch_3', 'data_batch_4', 'data_batch_5']
 TEST_FILE = 'test_batch'
+HEIGHT = 32
+WIDTH = 32
 
 def unpickle(file):
     with open(file, 'rb') as fo:
@@ -61,10 +63,12 @@ def random_batch_brightness(batch_image, max_delta=32):
     :param batch_image: [batch, height, width, channel]
     :return:
     '''
+    brightness_batch = np.zeros(len(batch_image) * HEIGHT * WIDTH * 3).reshape(
+        len(batch_image), HEIGHT, WIDTH, 3)
     for i in range(len(batch_image)):
-        batch_image[i, ...] = random_brightness(batch_image[i, ...], max_delta)
+        brightness_batch[i, ...] = random_brightness(batch_image[i, ...], max_delta)
 
-    return batch_image
+    return brightness_batch
 
 def random_contrast(image, lower, upper):
     '''
@@ -90,10 +94,14 @@ def random_batch_contrast(batch_image, lower=0.8, upper=1.2):
     :param upper:
     :return:
     '''
-    for i in range(len(batch_image)):
-        batch_image[i, ...] = random_contrast(batch_image[i, ...], lower, upper)
 
-    return batch_image
+    contrast_batch = np.zeros(len(batch_image) * HEIGHT * WIDTH * 3).reshape(
+        len(batch_image), HEIGHT, WIDTH, 3)
+
+    for i in range(len(batch_image)):
+        contrast_batch[i, ...] = random_contrast(batch_image[i, ...], lower, upper)
+
+    return contrast_batch
 
 def image_standardization(image):
     '''
@@ -110,10 +118,13 @@ def image_standardization(image):
 
 def image_standardization_batch(batch_image):
 
-    for i in range(len(batch_image)):
-        batch_image[i, ...] = image_standardization(batch_image[i, ...])
+    std_batch = np.zeros(len(batch_image) * HEIGHT * WIDTH * 3).reshape(
+        len(batch_image), HEIGHT, WIDTH, 3)
 
-    return batch_image
+    for i in range(len(batch_image)):
+        std_batch[i, ...] = image_standardization(batch_image[i, ...])
+
+    return std_batch
 
 def read_train_files():
     image_data = np.array([[]], dtype=np.uint8)

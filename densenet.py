@@ -12,6 +12,9 @@ k = 12
 L = 40
 layers = 6
 
+#Used for BN
+_BATCH_NORM_DECAY = 0.997
+_BATCH_NORM_EPSILON = 1e-5
 
 '''
 (layers * 2) * dense_blocks_num + (dense_blocks_num - 1) + 1(init) + 1(fc)  
@@ -39,9 +42,12 @@ def bias_variable(shape, name='bias'):
     return tf.Variable(initial)
 
 
-def bn_layer(x, is_training):
-    output = tf.contrib.layers.batch_norm(x, scale=True, is_training=is_training, updates_collections=None)
-    return output
+def bn_layer(inputs, training):
+
+  return tf.layers.batch_normalization(
+      inputs=inputs, axis=-1,
+      momentum=_BATCH_NORM_DECAY, epsilon=_BATCH_NORM_EPSILON, center=True,
+      scale=True, training=training, fused=True)
 
 
 def dense_block_layer(input, k, k0, layer, train, keep_prob):
@@ -128,12 +134,14 @@ def densenet_cifar(input, keep_prob, train=True):
         input = tf.reduce_mean(input, axis=[1, 2])
         input_shape = input.get_shape().as_list()
         weights = weight_variable(shape=[input_shape[-1], CLASSES])
-        input = tf.matmul(input, weights)
+        bias = bias_variable([CLASSES])
+        input = tf.matmul(input, weights) + bias
+
     output = input
     return output
 
 
 if __name__ == '__main__':
     input = tf.constant(0.1, shape=[8, 32, 32, 3], dtype=tf.float32)
-    output = densenet_cifar(input, True)
+    output = densenet_cifar(input, 1.0)
     print(output)

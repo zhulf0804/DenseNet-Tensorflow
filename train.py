@@ -8,16 +8,18 @@ import os
 import densenet as DenseNet
 import input_data
 
-BATCH_SIZE = 64
-HEIGHT = 32
-WIDTH = 32
+BATCH_SIZE = 128
+HEIGHT = input_data.HEIGHT
+WIDTH = input_data.WIDTH
 CHANNELS = 3
 CLASSES = DenseNet.CLASSES
-scale = 1e-5 # L2 normalization
 
-KEEP_PROB = 0.85
-MAX_STEPS = 44000
-initial_lr = 0.002
+
+KEEP_PROB = 0.8
+#MAX_STEPS = 44000
+#initial_lr = 0.002
+MAX_STEPS = 80000
+initial_lr = 0.1
 
 saved_ckpt_path = './checkpoint/'
 saved_summary_train_path = './summary/train/'
@@ -31,21 +33,17 @@ with tf.name_scope('input'):
 
 logits = DenseNet.densenet_cifar(x, keep_prob, True)
 
-with tf.name_scope('regularization'):
-    regularizer = tf.contrib.layers.l2_regularizer(scale)
-    reg_term = tf.contrib.layers.apply_regularization(regularizer)
-
 with tf.name_scope("loss"):
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_onehot, logits=logits, name='loss'))
-    #loss_all = loss + reg_term
     tf.summary.scalar('loss', loss)
-    #tf.summary.scalar('loss_all', loss_all)
+
 
 with tf.name_scope('learning_rate'):
     lr = tf.Variable(initial_lr, dtype=tf.float32)
     tf.summary.scalar('learning_rate', lr)
 
-optimizer = tf.train.AdamOptimizer(lr).minimize(loss)
+#optimizer = tf.train.AdamOptimizer(lr).minimize(loss)
+optimizer = tf.train.MomentumOptimizer(learning_rate=lr, momentum=0.9).minimize(loss)
 
 with tf.name_scope('accuracy'):
     softmax = tf.nn.softmax(logits, axis=-1)
@@ -97,20 +95,8 @@ with tf.Session() as sess:
                     i, learning_rate, train_loss_val, train_accuracy, test_loss_val,
                     test_accuracy))
 
-        '''
-        train_accuracy, train_loss_val_all, train_loss_val = sess.run([accuracy, loss_all, loss],
-                                                                      feed_dict={x: train_img_data, y: train_lables, keep_prob: 1.0})
-        test_accuracy, test_loss_val_all, test_loss_val = sess.run([accuracy, loss_all, loss],
-                                                                   feed_dict={x: test_img_data, y: test_labels, keep_prob: 1.0})
-
-        if i % 10 == 0:
-            learning_rate = sess.run(lr)
-            print(
-                "train step: %d, learning rate: %f, train loss all: %f, train loss: %f, train accuracy: %f, test loss all: %f, test loss: %f, test accuracy: %f" % (
-                i, learning_rate, train_loss_val_all, train_loss_val, train_accuracy, test_loss_val_all, test_loss_val,
-                test_accuracy))
-        '''
-        if i % 2000 == 0:
+        if i % 10000 == 0:
             saver.save(sess, os.path.join(saved_ckpt_path, 'densenet.model'), global_step=i)
-        if i != 0 and i % 4000 == 0:
-            sess.run(tf.assign(lr, 0.8 * lr))
+
+        if i == 40000 or i == 60000:
+            sess.run(tf.assign(lr, 0.1 * lr))

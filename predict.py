@@ -38,7 +38,7 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
 
-    saver.restore(sess, './checkpoint/densenet.model-44000')
+    saver.restore(sess, './checkpoint/densenet.model-60000')
 
     #ckpt = tf.train.get_checkpoint_state(saved_ckpt_path)
     #if ckpt and ckpt.model_checkpoint_path:
